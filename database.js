@@ -40,7 +40,7 @@ app.use((req, res, next) => {
     next();
 });
 
-const JWT_SECRET = 'your-secret-key-change-in-production';
+//const JWT_SECRET = 'your-secret-key-change-in-production';
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -77,3 +77,4 @@ app.listen(port, async () => {
     console.log('Server running on port $',{port});
     await getConnection(); // <-- тут перевірка підключення
 });
+
