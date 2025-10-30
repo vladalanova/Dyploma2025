@@ -229,7 +229,7 @@ function showAlert(type, message) {
     
     const alert = document.createElement('div');
     alert.className = `alert alert-${type}`;
-    alert.innerHTML = message;
+    alert.innerText = message;
     alert.style.marginTop = '15px';
     
     const content = document.querySelector('.container');
@@ -768,3 +768,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 });
+
