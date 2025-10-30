@@ -472,17 +472,22 @@ app.put('/api/patients/:patientID/sessions', requireAuth, async (req, res) => {
 app.use(express.static(path.join(__dirname, 'public')));
 
 // HTML маршрути (fallback)
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+const staticLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  message: 'Занадто часті запити до статичних файлів.'
 });
 
-app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'login.html'));
-});
+app.use('/', staticLimiter, express.static(path.join(__dirname, 'public')));
 
-app.get('/register', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'register.html'));
-});
+
+//app.get('/login', (req, res) => {
+    //res.sendFile(path.join(__dirname, 'public', 'login.html'));
+//});
+
+//app.get('/register', (req, res) => {
+    //res.sendFile(path.join(__dirname, 'public', 'register.html'));
+//});
 
 // ============================================
 // START SERVER
@@ -503,4 +508,5 @@ app.listen(PORT, async () => {
 process.on('SIGINT', async () => {
     console.log('\nЗупинка сервера...');
     process.exit(0);
+
 });
