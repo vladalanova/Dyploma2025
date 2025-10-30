@@ -18,16 +18,28 @@ function checkAuth() {
         .then(res => res.json())
         .then(data => {
             if (data.success) {
-                authStatus.innerHTML = `
-                    <div style="color: green;">
-                        ✅ Авторизовано: ${data.user.fullName} (${data.user.role})
-                        <button onclick="logout()" style="margin-left: 10px; padding: 4px 8px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                            Вийти
-                        </button>
-                    </div>
-                `;
-                loginForm.style.display = 'none';
-            } else {
+    const div = document.createElement('div');
+    div.style.color = 'green';
+
+    const text = document.createTextNode(`✅ Авторизовано: ${data.user.fullName} (${data.user.role})`);
+    div.appendChild(text);
+
+    const button = document.createElement('button');
+    button.textContent = 'Вийти';
+    button.style.marginLeft = '10px';
+    button.style.padding = '4px 8px';
+    button.style.background = '#dc3545';
+    button.style.color = 'white';
+    button.style.border = 'none';
+    button.style.borderRadius = '4px';
+    button.style.cursor = 'pointer';
+    button.onclick = logout;
+
+    div.appendChild(button);
+    authStatus.innerHTML = ''; // очищаємо
+    authStatus.appendChild(div);
+}
+ else {
                 // Токен невалідний
                 localStorage.removeItem('token');
                 showLoginForm();
@@ -754,4 +766,5 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Користувач:', username);
         console.log('Роль:', userRole);
     }
+
 });
