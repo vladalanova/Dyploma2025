@@ -29,17 +29,15 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 // Додаткові CORS заголовки
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    
-    if (req.method === 'OPTIONS') {
-        return res.sendStatus(200);
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS заблоковано для цього джерела'));
     }
-    next();
-});
+  }
+}));
 
 //const JWT_SECRET = 'your-secret-key-change-in-production';
 
@@ -78,5 +76,6 @@ app.listen(port, async () => {
     console.log('Server running on port $',{port});
     await getConnection(); // <-- тут перевірка підключення
 });
+
 
 
