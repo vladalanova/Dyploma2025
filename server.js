@@ -8,6 +8,9 @@ const odbc = require('odbc');
 const { requireAuth, requireRole, generateToken } = require('./routes/auth.js');
 
 const app = express();
+app.disable('x-powered-by');
+
+
 const PORT = process.env.PORT || 8080;
 
 // ============================================
@@ -510,3 +513,4 @@ process.on('SIGINT', async () => {
     process.exit(0);
 
 });
+
