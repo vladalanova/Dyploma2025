@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Медична система</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border: 1px solid #ddd;
+        }
+
+        h1 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .tabs {
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 15px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .tab.active {
+            color: #000;
+            border-bottom: 2px solid #000;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        h2 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .status-list {
+            margin-bottom: 20px;
+        }
+
+        .status-item {
+            padding: 8px;
+            margin-bottom: 5px;
+            background: #f9f9f9;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .badge {
+            padding: 2px 8px;
+            font-size: 12px;
+        }
+
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px 0;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #000;
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .row > div {
+            flex: 1;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 15px;
+            background: #000;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover:not(:disabled) {
+            background: #333;
+        }
+
+        button:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
+
+        .info {
+            padding: 10px;
+            margin: 15px 0;
+            background: #ffffcc;
+            border-left: 3px solid #ffeb3b;
+            font-size: 13px;
+        }
+
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e7f3ff;
+            border-left: 3px solid #2196f3;
+        }
+
+        .result h3 {
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .result-item {
+            margin: 8px 0;
+            font-size: 13px;
+        }
+
+        .result-label {
+            color: #666;
+            font-size: 12px;
+        }
+
+        .result-value {
+            color: #000;
+            word-break: break-all;
+        }
+
+        small {
+            display: block;
+            margin-top: 3px;
+            color: #666;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1></h1>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('status')">Статус</button>
+            <button class="tab" onclick="switchTab('register')">Реєстрація</button>
+            <button class="tab" onclick="switchTab('calculate')">Розрахунок</button>
+            <button class="tab" onclick="switchTab('sessions')">Сесії</button>
+        </div>
+
+        <!-- Статус -->
+        <div id="status" class="tab-content active">
+            <h2>Статус системи</h2>
+            
+            <div class="status-list">
+                <div class="status-item">
+                    <span>Блокчейн</span>
+                    <span id="blockchain-status" class="badge badge-error">Відключено</span>
+                </div>
+                <div class="status-item">
+                    <span>Ключі</span>
+                    <span id="keys-status" class="badge badge-error">Немає</span>
+                </div>
+                <div class="status-item">
+                    <span>Контракт</span>
+                    <span id="contract-status" class="badge badge-error">Немає</span>
+                </div>
+            </div>
+
+            <button onclick="initializeSystem()">Ініціалізувати</button>
+
+            <div class="info">
+                <strong>Налаштування:</strong><br>
+                RPC: http://127.0.0.1:7545<br>
+                Шифрування: Paillier<br>
+                Хеш: Keccak-256
+            </div>
+        </div>
+        <!-- Реєстрація -->
+        <div id="register" class="tab-content">
+            <h2>Реєстрація пацієнта</h2>
+
+            <form onsubmit="storePatientData(event)">
+                <label>Паспорт</label>
+                <input type="text" id="passport" required>
+
+                <label>Медкартка</label>
+                <input type="text" id="medicalCard" required>
+
+                <div class="row">
+                    <div>
+                        <label>Зріст (см)</label>
+                        <input type="number" id="height" required min="50" max="300">
+                    </div>
+                    <div>
+                        <label>Вага (кг)</label>
+                        <input type="number" id="weight" required min="20" max="300">
+                    </div>
+                </div>
+
+                <label>Сесії</label>
+                <input type="number" id="initialSessions" required value="0" min="0" max="100">
+                <small>Кількість проведених сесій</small>
+
+                <button type="submit" id="store-btn">Зберегти</button>
+            </form>
+
+            <div id="store-result" style="display: none;"></div>
+        </div>
+
+        <!-- Розрахунок -->
+        <div id="calculate" class="tab-content">
+            <h2>Розрахунок дози</h2>
+
+            <form onsubmit="calculateDose(event)">
+                <label>Паспорт</label>
+                <input type="text" id="calcPassport" required>
+
+                <label>Медкартка</label>
+                <input type="text" id="calcMedicalCard" required>
+
+                <label>Коефіцієнт (мг/м²)</label>
+                <input type="number" id="doseCoefficient" required value="50" step="0.1">
+
+                <button type="submit" id="calc-btn">Розрахувати</button>
+            </form>
+
+            <div id="calc-result" style="display: none;"></div>
+        </div>
+
+        <!-- Сесії -->
+        <div id="sessions" class="tab-content">
+            <h2>Додати сесію</h2>
+
+            <form onsubmit="updateSessions(event)">
+                <label>Паспорт</label>
+                <input type="text" id="sessionPassport" required>
+
+                <label>Медкартка</label>
+                <input type="text" id="sessionMedicalCard" required>
+
+                <button type="submit" id="session-btn">Додати +1</button>
+            </form>
+
+            <div id="session-result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/big-integer@1.6.52/BigInteger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.7.1/dist/ethers.umd.min.js"></script>
+    <script>
+        // Перевірка автентифікації та ролей
+        const authToken = localStorage.getItem('authToken');
+        const userRole = localStorage.getItem('userRole');
+        const username = localStorage.getItem('username');
+
+        if (!authToken) {
+            // Перенаправлення на сторінку входу
+            window.location.href = 'login.html';
+        } else {
+            console.log('Користувач:', username, 'Роль:', userRole);
+            
+            // Приховуємо вкладки залежно від ролі
+            document.addEventListener('DOMContentLoaded', () => {
+                const registerTab = document.querySelector('.tab[onclick*="register"]');
+                const calculateTab = document.querySelector('.tab[onclick*="calculate"]');
+                
+                // Медсестра не має доступу до реєстрації та розрахунку
+                if (userRole === 'Nurse') {
+                    if (registerTab) {
+                        registerTab.style.display = 'none';
+                    }
+                    if (calculateTab) {
+                        calculateTab.style.display = 'none';
+                    }
+                    
+                    // Автоматично переключаємо на вкладку "Сесії"
+                    switchTab('sessions');
+                }
+                
+                // Аудитор бачить тільки статус
+                if (userRole === 'Auditor') {
+                    if (registerTab) registerTab.style.display = 'none';
+                    if (calculateTab) calculateTab.style.display = 'none';
+                    document.querySelector('.tab[onclick*="sessions"]').style.display = 'none';
+                }
+                
+                // Додаємо інформацію про користувача
+                const header = document.querySelector('.container');
+                if (header) {
+                    const userInfo = document.createElement('div');
+                    userInfo.style.cssText = 'padding: 10px; background: #f0f0f0; text-align: right; font-size: 12px;';
+                    userInfo.innerHTML = `
+                        👤 ${username} (${userRole}) 
+                        <a href="#" onclick="logout()" style="margin-left: 15px; color: #667eea;">Вийти</a>
+                    `;
+                    header.insertBefore(userInfo, header.firstChild);
+                }
+                
+                // Показуємо підказку для медсестер
+                if (userRole === 'Nurse') {
+                    const nurseInfo = document.getElementById('nurse-info');
+                    if (nurseInfo) {
+                        nurseInfo.style.display = 'block';
+                    }
+                }
+            });
+        }
+    </script>
+    <script src="js/paillier.js"></script>
+    <script src="js/blockchain.js"></script>
+    <script src="js/medical-system.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

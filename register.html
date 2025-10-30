@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Реєстрація - Medical System</title>
+  <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        background: #f0f0f0;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .register-box {
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        width: 400px;
+        max-width: 100%;
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 22px;
+        color: #333;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 5px;
+        color: #555;
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+    input, select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    input:focus, select:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+
+    button {
+        width: 100%;
+        padding: 10px;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+    button:hover {
+        opacity: 0.9;
+    }
+
+    .error {
+        background: #f8d7da;
+        color: #721c24;
+        padding: 8px;
+        border-radius: 4px;
+        margin-bottom: 10px;
+        display: none;
+        font-size: 14px;
+    }
+
+    .success {
+        background: #d4edda;
+        color: #155724;
+        padding: 8px;
+        border-radius: 4px;
+        margin-bottom: 10px;
+        display: none;
+        font-size: 14px;
+    }
+
+    .login-link {
+        text-align: center;
+        margin-top: 15px;
+        font-size: 14px;
+    }
+
+    .login-link a {
+        color: #667eea;
+        text-decoration: none;
+    }
+</style>
+</head>
+<body>
+    <div class="register-box">
+        <h1>Реєстрація</h1>
+
+        <div id="error-message" class="error"></div>
+        <div id="success-message" class="success"></div>
+
+        <form id="register-form">
+            <div class="form-group">
+                <label for="fullName">Повне ім'я *</label>
+                <input type="text" id="fullName" required>
+            </div>
+
+            <div class="form-group">
+                <label for="username">Логін *</label>
+                <input type="text" id="username" required autocomplete="username">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email *</label>
+                <input type="email" id="email" required autocomplete="email">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Пароль *</label>
+                <input type="password" id="password" required autocomplete="new-password" minlength="6">
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword">Підтвердження пароля *</label>
+                <input type="password" id="confirmPassword" required autocomplete="new-password">
+            </div>
+
+            <div class="form-group">
+                <label for="role">Роль</label>
+                <select id="role">
+                    <option value="Doctor">Лікар</option>
+                    <option value="Nurse">Медсестра</option>
+                    <option value="Auditor">Аудитор</option>
+                </select>
+            </div>
+
+            <button type="submit" id="register-btn">Зареєструватись</button>
+        </form>
+
+        <div class="login-link">
+            Вже є акаунт? <a href="login">Увійти</a>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8080/api';
+
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const fullName = document.getElementById('fullName').value;
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const role = document.getElementById('role').value;
+
+            const registerBtn = document.getElementById('register-btn');
+            const errorDiv = document.getElementById('error-message');
+            const successDiv = document.getElementById('success-message');
+
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+
+            // Перевірка паролів
+            if (password !== confirmPassword) {
+                errorDiv.textContent = 'Паролі не співпадають';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            if (password.length < 6) {
+                errorDiv.textContent = 'Пароль має бути мінімум 6 символів';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            registerBtn.disabled = true;
+            registerBtn.textContent = 'Реєстрація...';
+
+            try {
+                const response = await fetch(`${API_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        fullName,
+                        username,
+                        email,
+                        password,
+                        role
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    successDiv.textContent = 'Реєстрація успішна! Перенаправлення на вхід...';
+                    successDiv.style.display = 'block';
+
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                } else {
+                    errorDiv.textContent = data.error || 'Помилка реєстрації';
+                    errorDiv.style.display = 'block';
+                    registerBtn.disabled = false;
+                    registerBtn.textContent = 'Зареєструватись';
+                }
+            } catch (error) {
+                console.error('Register error:', error);
+                errorDiv.textContent = 'Помилка підключення до сервера';
+                errorDiv.style.display = 'block';
+                registerBtn.disabled = false;
+                registerBtn.textContent = 'Зареєструватись';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вхід - Медична система</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 30px;
+            color: #333;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: transform 0.2s;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .alert {
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e7f3ff;
+            border-radius: 5px;
+            font-size: 13px;
+            color: #004085;
+        }
+
+        .info strong {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .role-description {
+            margin-top: 5px;
+            font-size: 12px;
+            color: #666;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>🏥 Медична система</h1>
+        
+        <div id="alert" class="alert"></div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Ім'я користувача</label>
+                <input 
+                    type="text" 
+                    id="username" 
+                    name="username" 
+                    required 
+                    placeholder="Введіть ваше ім'я"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password">Пароль</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    required 
+                    placeholder="Введіть пароль"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="role">Роль</label>
+                <select id="role" name="role" required>
+                    <option value="">Оберіть роль</option>
+                    <option value="Doctor">Лікар</option>
+                    <option value="Nurse">Медсестра</option>
+                    <option value="Auditor">Аудитор</option>
+                </select>
+                <div class="role-description" id="roleDescription"></div>
+            </div>
+
+            <button type="submit" id="loginBtn">Увійти</button>
+        </form>
+
+        <div class="info">
+            <strong>Тестові облікові записи:</strong>
+            <div style="margin-top: 8px; line-height: 1.6;">
+                🩺 <strong>Лікар:</strong> admin / admin123<br>
+                💉 <strong>Медсестра:</strong> nurse / nurse123<br>
+                📊 <strong>Аудитор:</strong> auditor / audit123
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8080/api';
+
+        // Описи ролей
+        const roleDescriptions = {
+            'Doctor': 'Повний доступ: реєстрація пацієнтів, розрахунок дози, оновлення сесій',
+            'Nurse': 'Обмежений доступ: тільки оновлення сесій хіміотерапії',
+            'Auditor': 'Перегляд: тільки статус системи та аудит'
+        };
+
+        // Показати опис ролі
+        document.getElementById('role').addEventListener('change', function() {
+            const roleDesc = document.getElementById('roleDescription');
+            const selectedRole = this.value;
+            
+            if (selectedRole && roleDescriptions[selectedRole]) {
+                roleDesc.textContent = roleDescriptions[selectedRole];
+                roleDesc.style.display = 'block';
+            } else {
+                roleDesc.style.display = 'none';
+            }
+        });
+
+        // Показати повідомлення
+        function showAlert(type, message) {
+            const alert = document.getElementById('alert');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            alert.style.display = 'block';
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+
+        // Обробка форми входу
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+            
+            if (!username || !password || !role) {
+                showAlert('error', '❌ Заповніть всі поля');
+                return;
+            }
+            
+            const loginBtn = document.getElementById('loginBtn');
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Вхід...';
+            
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password, role })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    // КРИТИЧНО: Зберігаємо всі дані в localStorage
+                    localStorage.setItem('authToken', data.token);
+                    localStorage.setItem('username', data.user.username);
+                    localStorage.setItem('userRole', data.user.role);
+                    localStorage.setItem('userId', data.user.id);
+                    
+                    console.log('✅ Успішний вхід:');
+                    console.log('   Token:', data.token.substring(0, 20) + '...');
+                    console.log('   Username:', data.user.username);
+                    console.log('   Role:', data.user.role);
+                    console.log('   User ID:', data.user.id);
+                    
+                    showAlert('success', '✅ Успішний вхід! Перенаправлення...');
+                    
+                    // Перенаправлення через 1 секунду
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1000);
+                    
+                } else {
+                    showAlert('error', `❌ ${data.message || 'Помилка входу'}`);
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'Увійти';
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showAlert('error', '❌ Помилка з\'єднання з сервером. Перевірте чи запущений backend.');
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Увійти';
+            }
+        });
+
+        // Перевірка чи користувач вже залогінений
+        window.addEventListener('DOMContentLoaded', () => {
+            const authToken = localStorage.getItem('authToken');
+            if (authToken) {
+                console.log('Користувач вже залогінений, перенаправлення...');
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
+</body>
+</html>
