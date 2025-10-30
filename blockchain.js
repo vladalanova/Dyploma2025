@@ -476,7 +476,7 @@ const CONTRACT_ABI = [
 
 const GANACHE_RPC = "http://127.0.0.1:7545";
 const CONTRACT_ADDRESS = "0x67F141a0D47504A1347DD06e31edC7FDdb1eD7Ea";
-const PRIVATE_KEY = "0x8d6a8b43f457a8e51b737289f6715bc53281047c749858f8c3848263e0b118b2";
+const PRIVATE_KEY = "";
 
 let provider = null;
 let wallet = null;
@@ -560,7 +560,7 @@ async function initializeBlockchain() {
         // 2. Підключення до Ganache
         provider = new ethers.JsonRpcProvider('http://127.0.0.1:7545');
         
-        const privateKey = '0x8d6a8b43f457a8e51b737289f6715bc53281047c749858f8c3848263e0b118b2';
+        const privateKey = '';
         wallet = new ethers.Wallet(privateKey, provider);
         
         const contractAddress = '0x67F141a0D47504A1347DD06e31edC7FDdb1eD7Ea';
@@ -1205,4 +1205,5 @@ async function debugFullEncryptionFlow() {
 }
 
 // Експортуємо для викликів з консолі
+
 window.debugFullEncryptionFlow = debugFullEncryptionFlow;
