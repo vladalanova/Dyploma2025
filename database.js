@@ -6,6 +6,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const app = express();
+app.disable('x-powered-by');
 const port = 8080;
 
 // ============================================
@@ -77,4 +78,5 @@ app.listen(port, async () => {
     console.log('Server running on port $',{port});
     await getConnection(); // <-- тут перевірка підключення
 });
+
 
