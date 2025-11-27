@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
@@ -8,6 +9,7 @@ const odbc = require('odbc');
 const { requireAuth, requireRole, generateToken } = require('./routes/auth.js');
 
 const app = express();
+app.use(helmet());
 app.disable('x-powered-by');
 
 
@@ -509,5 +511,6 @@ process.on('SIGINT', async () => {
     process.exit(0);
 
 });
+
 
 
